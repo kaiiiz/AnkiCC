@@ -11,6 +11,8 @@ from aqt.qt import *
 
 from .opencc_python.opencc.opencc import OpenCC
 
+import json
+
 
 def testFunction() -> None:
     if mw is None:
@@ -26,21 +28,42 @@ def testFunction() -> None:
     # mw.col.decks.all_names_and_ids
 
     cc = OpenCC("s2t")
-    ids = mw.col.decks.cids(mw.col.decks.get_current_id())
+    did = mw.col.decks.get_current_id()
+    deck = mw.col.decks.get(did)
+    if deck is None:
+        return
+    deck["name"] = cc.convert(deck["name"])
+    mw.col.decks.save(deck)
+    ids = mw.col.decks.cids(did)
     for id in ids:
         card = mw.col.get_card(id)
         note = card.note()
+        note_type = note.note_type()
+        if note_type is None:
+            return
 
-        for k, v in note.items():
-            # converted_k = cc.convert(k)
-            converted_v = cc.convert(v)
-            note[k] = converted_v
+        for k, v in note_type.items():
+            if isinstance(v, str):
+                note_type[k] = cc.convert(v)
+            elif isinstance(v, dict) or isinstance(v, list):
+                note_type[k] = json.loads(cc.convert(json.dumps(v, ensure_ascii=False)))
+                showInfo(f"{note_type[k]}")
 
-        mw.col.update_note(note)
-        # showInfo(f"card: {dir(card)}")
-        showInfo(f"card: {note.keys()}")
-        showInfo(f"card: {note.values()}")
+        mw.col.models.save(note_type)
 
+        # showInfo(f"notetype: {note_type.keys()}")
+        showInfo(f"notetype: {note.note_type()}")
+        #
+        # for k, v in note.items():
+        #     # converted_k = cc.convert(k)
+        #     converted_v = cc.convert(v)
+        #     note[k] = converted_v
+        #
+        # mw.col.update_note(note)
+        # # showInfo(f"card: {dir(card)}")
+        # showInfo(f"card: {note.keys()}")
+        # showInfo(f"card: {note.values()}")
+        #
         break
     # showInfo("Card counttt: %d" % (len(ids)))
     # show a message box
