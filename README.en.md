@@ -1,6 +1,6 @@
 # AnkiCC
 
-[OpenCC](https://github.com/BYVoid/OpenCC) add-on for Anki, supporting mutual conversion between Traditional and Simplified Chinese for the Anki deck.
+An Anki add-on based on [OpenCC](https://github.com/BYVoid/OpenCC) that enables mutual conversion between Traditional and Simplified Chinese for the Anki decks.
 
 README: [English](https://github.com/kaiiiz/AnkiCC/blob/main/README.en.md), [繁體中文](https://github.com/kaiiiz/AnkiCC/blob/main/README.md)
 
@@ -18,7 +18,7 @@ Manual installation:
 ## Usage
 
 1. From Anki's main window, head to _Tools → AnkiCC_
-2. Select the deck to convert and an OpenCC profile
+2. Select the deck to convert and an [OpenCC](https://github.com/BYVoid/OpenCC) profile
 3. Click the _Convert_ button
 4. Restart Anki to reload the converted deck
 

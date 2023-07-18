@@ -1,6 +1,6 @@
 # AnkiCC
 
-[OpenCC](https://github.com/BYVoid/OpenCC) add-on for Anki, 可以將 Anki 牌組中的所有欄位在繁體及簡體中文間進行相互轉換。
+一個基於 [OpenCC](https://github.com/BYVoid/OpenCC) 的 Anki 插件，可以將 Anki 牌組在繁體及簡體中文間進行相互轉換。
 
 README: [English](https://github.com/kaiiiz/AnkiCC/blob/main/README.en.md), [繁體中文](https://github.com/kaiiiz/AnkiCC/blob/main/README.md)
 
@@ -18,7 +18,7 @@ README: [English](https://github.com/kaiiiz/AnkiCC/blob/main/README.en.md), [繁
 ## 使用
 
 1. 打開 Anki，選擇 _工具 → AnkiCC_
-2. 選擇欲轉換的牌組及 OpenCC profile
+2. 選擇欲轉換的牌組及 [OpenCC](https://github.com/BYVoid/OpenCC) profile
 3. 點擊 _Convert_
 4. 重啟 Anki 載入修改後的牌組
 
