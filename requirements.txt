@@ -1,0 +1,2 @@
+aqt[qt6]==2.1.65
+opencc_python_reimplemented==0.1.7

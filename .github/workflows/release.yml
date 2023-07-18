@@ -24,7 +24,7 @@ jobs:
       - name: Pack addon
         run: |
           mkdir dist
-          zip -r dist/ankicc.ankiaddon . -x "venv/*" ".git/*" "__pycache__/*" "dist/*"
+          zip -r dist/ankicc.ankiaddon . -x "venv/*" ".git/*" ".github/*" ".git*" "__pycache__/*" "dist/*" "requirements.txt"
 
       - name: Create Release
         uses: ncipollo/release-action@v1
