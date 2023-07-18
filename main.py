@@ -29,6 +29,19 @@ def get_mw() -> AnkiQt:
 
 mw = get_mw()
 
+OPENCC_PROFILE = [
+    "hk2s",
+    "s2hk",
+    "s2t",
+    "s2tw",
+    "s2twp",
+    "t2hk",
+    "t2s",
+    "t2tw",
+    "tw2s",
+    "tw2sp",
+]
+
 
 class AnkiCCDialog(QDialog):
     def __init__(self, deck_names_and_ids: Sequence[decks_pb2.DeckNameId]) -> None:
@@ -45,18 +58,7 @@ class AnkiCCDialog(QDialog):
 
         cc_label = QLabel("Choose OpenCC profile:")
         self.cc_dropdown = QComboBox()
-        for cc in [
-            "hk2s",
-            "s2hk",
-            "s2t",
-            "s2tw",
-            "s2twp",
-            "t2hk",
-            "t2s",
-            "t2tw",
-            "tw2s",
-            "tw2sp",
-        ]:
+        for cc in OPENCC_PROFILE:
             self.cc_dropdown.addItem(cc)
 
         cc_hbox = QHBoxLayout()
