@@ -1,6 +1,6 @@
 from anki.collection import DeckId
 from anki import decks_pb2
-from aqt import mw
+from aqt.main import AnkiQt
 from aqt.operations import QueryOp
 from aqt.utils import showCritical, showInfo
 from aqt.qt import qconnect
@@ -19,11 +19,19 @@ from .opencc_python.opencc.opencc import OpenCC
 import json
 
 
-DeckNameId = decks_pb2.DeckNameId
+def get_mw() -> AnkiQt:
+    from aqt import mw
+
+    if mw is None:
+        raise Exception("Error: main window is uninitialized")
+    return mw
 
 
-class CCDialog(QDialog):
-    def __init__(self, deckNamesAndIds: Sequence[DeckNameId]) -> None:
+mw = get_mw()
+
+
+class AnkiCCDialog(QDialog):
+    def __init__(self, deckNamesAndIds: Sequence[decks_pb2.DeckNameId]) -> None:
         super().__init__()
 
         deck_label = QLabel("Choose deck:")
@@ -68,24 +76,30 @@ class CCDialog(QDialog):
         self.setMinimumHeight(100)
 
     def convert(self):
+        def on_convert_success(convert_ret: tuple[int, int]) -> None:
+            num_cards = convert_ret[0]
+            num_nt = convert_ret[1]
+            showInfo(f"Convert {num_cards} cards and {num_nt} note type successfully")
+
         deck_id = self.deck_dropdown.currentData()
         cc_profile = self.cc_dropdown.currentText()
         op = QueryOp(
             parent=self,
             op=lambda _: self.convert_deck(deck_id, cc_profile),
-            success=self.on_convert_success,
+            success=on_convert_success,
         )
         op.with_progress().run_in_background()
 
-    @staticmethod
-    def on_convert_success(convert_ret: tuple[int, int]) -> None:
-        num_cards = convert_ret[0]
-        num_nt = convert_ret[1]
-        showInfo(f"Convert {num_cards} cards and {num_nt} note type successfully")
-
     def convert_deck(self, deck_id: DeckId, cc_profile: str) -> tuple[int, int]:
-        if mw is None or mw.col is None:
-            raise Exception("Error: main window is uninitialized")
+        def update_progess(label: str, val: int, num_cards: int):
+            mw.progress.update(
+                label=f"{label} ({val}/{num_cards})",
+                value=val,
+                max=num_cards,
+            )
+
+        if mw.col is None:
+            raise Exception("Error: collection is uninitialized")
 
         cc = OpenCC(cc_profile)
         deck = mw.col.decks.get(deck_id)
@@ -100,16 +114,6 @@ class CCDialog(QDialog):
         cids = mw.col.decks.cids(deck_id)
         num_cards = len(cids)
         note_types = {}
-
-        def update_progess(label: str, val: int, num_cards: int):
-            if mw is None:
-                return
-            mw.progress.update(
-                label=f"{label} ({val}/{num_cards})",
-                value=val,
-                max=num_cards,
-            )
-
         for idx, cid in enumerate(cids):
             card = mw.col.get_card(cid)
             note = card.note()
@@ -118,7 +122,8 @@ class CCDialog(QDialog):
                 continue
 
             ntid = note_type["id"]
-            note_types[ntid] = note_type
+            if ntid not in note_types:
+                note_types[ntid] = note_type
 
             for k, v in note.items():
                 note[k] = cc.convert(v)
@@ -147,18 +152,15 @@ class CCDialog(QDialog):
 
 
 def main() -> None:
-    if mw is None or mw.col is None:
-        showCritical("Error: main window is uninitialized")
+    if mw.col is None:
+        showCritical("Error: collection is uninitialized")
         return
 
     deckNamesAndIds = mw.col.decks.all_names_and_ids()
-    dialog = CCDialog(deckNamesAndIds)
+    dialog = AnkiCCDialog(deckNamesAndIds)
     dialog.exec()
 
 
-# create a new menu item, "test"
 action = QAction("AnkiCC", mw)
-# set it to call testFunction when it's clicked
 qconnect(action.triggered, main)
-# and add it to the tools menu
 mw.form.menuTools.addAction(action)
