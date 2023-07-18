@@ -1,15 +1,9 @@
-# import the main window object (mw) from aqt
-from PyQt6 import QtWidgets
 from anki.collection import DeckId
+from anki import decks_pb2
 from aqt import mw
-from aqt.forms.main import QtCore
-
-# import the "show info" tool from utils.py
+from aqt.operations import QueryOp
 from aqt.utils import showCritical, showInfo
-
 from aqt.qt import qconnect
-
-# import all of the Qt GUI library
 from aqt.qt import (
     QComboBox,
     QLabel,
@@ -19,13 +13,11 @@ from aqt.qt import (
     QVBoxLayout,
     QAction,
 )
-
+from typing import Sequence
 from .opencc_python.opencc.opencc import OpenCC
 
 import json
-from typing import Sequence
 
-from anki import decks_pb2
 
 DeckNameId = decks_pb2.DeckNameId
 
@@ -43,7 +35,7 @@ class CCDialog(QDialog):
         deck_hbox.addWidget(deck_label)
         deck_hbox.addWidget(self.deck_dropdown)
 
-        cc_label = QLabel("Choose cc profile:")
+        cc_label = QLabel("Choose OpenCC profile:")
         self.cc_dropdown = QComboBox()
         for cc in [
             "hk2s",
@@ -78,18 +70,27 @@ class CCDialog(QDialog):
     def convert(self):
         deck_id = self.deck_dropdown.currentData()
         cc_profile = self.cc_dropdown.currentText()
-        self.convert_deck(deck_id, cc_profile)
+        op = QueryOp(
+            parent=self,
+            op=lambda _: self.convert_deck(deck_id, cc_profile),
+            success=self.on_convert_success,
+        )
+        op.with_progress().run_in_background()
 
-    def convert_deck(self, deck_id: DeckId, cc_profile: str):
+    @staticmethod
+    def on_convert_success(convert_ret: tuple[int, int]) -> None:
+        num_cards = convert_ret[0]
+        num_nt = convert_ret[1]
+        showInfo(f"Convert {num_cards} cards and {num_nt} note type successfully")
+
+    def convert_deck(self, deck_id: DeckId, cc_profile: str) -> tuple[int, int]:
         if mw is None or mw.col is None:
-            showCritical("Error: main window is uninitialized")
-            return
+            raise Exception("Error: main window is uninitialized")
 
         cc = OpenCC(cc_profile)
         deck = mw.col.decks.get(deck_id)
         if deck is None:
-            showCritical("Error: deck not found")
-            return
+            raise Exception("Error: deck not found")
 
         # convert deck data
         deck["name"] = cc.convert(deck["name"])
@@ -99,7 +100,17 @@ class CCDialog(QDialog):
         cids = mw.col.decks.cids(deck_id)
         num_cards = len(cids)
         note_types = {}
-        for cid in cids:
+
+        def update_progess(label: str, val: int, num_cards: int):
+            if mw is None:
+                return
+            mw.progress.update(
+                label=f"{label} ({val}/{num_cards})",
+                value=val,
+                max=num_cards,
+            )
+
+        for idx, cid in enumerate(cids):
             card = mw.col.get_card(cid)
             note = card.note()
             note_type = note.note_type()
@@ -113,10 +124,13 @@ class CCDialog(QDialog):
                 note[k] = cc.convert(v)
 
             mw.col.update_note(note)
+            mw.taskman.run_on_main(
+                lambda: update_progess("Convert cards", idx, num_cards)
+            )
 
         # convert note type
         num_nt = len(note_types)
-        for _, note_type in note_types.items():
+        for idx, (_, note_type) in enumerate(note_types.items()):
             for k, v in note_type.items():
                 if isinstance(v, str):
                     note_type[k] = cc.convert(v)
@@ -125,8 +139,11 @@ class CCDialog(QDialog):
                         cc.convert(json.dumps(v, ensure_ascii=False))
                     )
             mw.col.models.save(note_type)
+            mw.taskman.run_on_main(
+                lambda: update_progess("Convert note type", idx, num_nt)
+            )
 
-        showInfo(f"Convert {num_cards} cards and {num_nt} note type successfully")
+        return num_cards, num_nt
 
 
 def main() -> None:
