@@ -8,7 +8,11 @@ README: [English](https://github.com/kaiiiz/AnkiCC/blob/main/README.en.md), [繁
 
 Supported Anki version: `2.1.50+`
 
-Manual installation:
+### AnkiWeb
+
+Refer to [AnkiWeb](https://ankiweb.net/shared/info/158877706).
+
+### Manual installation
 
 1. Download the latest `.ankiaddon` package from the [releases](https://github.com/kaiiiz/AnkiCC/releases) tab
 2. From Anki's main window, head to _Tools → Add-ons_

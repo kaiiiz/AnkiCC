@@ -8,7 +8,11 @@ README: [English](https://github.com/kaiiiz/AnkiCC/blob/main/README.en.md), [繁
 
 支援的 Anki 版本: `2.1.50+`
 
-手動安裝:
+### AnkiWeb
+
+參考 [AnkiWeb](https://ankiweb.net/shared/info/158877706)
+
+### 手動安裝
 
 1. 到 [releases](https://github.com/kaiiiz/AnkiCC/releases) 下載最新的 `.ankiaddon` 套件
 2. 打開 Anki，選擇 _工具 → 附加元件_
