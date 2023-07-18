@@ -2,7 +2,7 @@
 
 [OpenCC](https://github.com/BYVoid/OpenCC) add-on for Anki, 可以將 Anki 牌組中的所有欄位在繁體及簡體中文間進行相互轉換。
 
-README: [English](https://github.com/kaiiiz/AnkiCC/README.en.md), [繁體中文](https://github.com/kaiiiz/AnkiCC/README.md)
+README: [English](https://github.com/kaiiiz/AnkiCC/blob/main/README.en.md), [繁體中文](https://github.com/kaiiiz/AnkiCC/blob/main/README.md)
 
 ## 安裝
 
