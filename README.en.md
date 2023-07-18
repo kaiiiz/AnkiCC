@@ -1,6 +1,6 @@
 # AnkiCC
 
-[OpenCC](https://github.com/BYVoid/OpenCC) add-on for Anki
+[OpenCC](https://github.com/BYVoid/OpenCC) add-on for Anki, supporting mutual conversion between Traditional and Simplified Chinese for the Anki deck.
 
 README: [English](https://github.com/kaiiiz/AnkiCC/README.en.md), [繁體中文](https://github.com/kaiiiz/AnkiCC/README.md)
 
