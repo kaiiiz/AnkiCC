@@ -1,20 +1,28 @@
 # import the main window object (mw) from aqt
 from PyQt6 import QtWidgets
+from anki.collection import DeckId
 from aqt import mw
 from aqt.forms.main import QtCore
 
 # import the "show info" tool from utils.py
-from aqt.utils import showInfo
+from aqt.utils import showCritical, showInfo
 
 from aqt.qt import qconnect
 
 # import all of the Qt GUI library
-from aqt.qt import *
+from aqt.qt import (
+    QComboBox,
+    QLabel,
+    QHBoxLayout,
+    QDialog,
+    QPushButton,
+    QVBoxLayout,
+    QAction,
+)
 
 from .opencc_python.opencc.opencc import OpenCC
 
 import json
-import typing
 from typing import Sequence
 
 from anki import decks_pb2
@@ -22,7 +30,7 @@ from anki import decks_pb2
 DeckNameId = decks_pb2.DeckNameId
 
 
-class Menu(QDialog):
+class CCDialog(QDialog):
     def __init__(self, deckNamesAndIds: Sequence[DeckNameId]) -> None:
         super().__init__()
 
@@ -68,74 +76,72 @@ class Menu(QDialog):
         self.setMinimumHeight(100)
 
     def convert(self):
-        deck_name = self.deck_dropdown.currentText()
         deck_id = self.deck_dropdown.currentData()
-        cc_name = self.cc_dropdown.currentText()
-        showInfo(f"Hello {deck_name} {deck_id} {cc_name}")
+        cc_profile = self.cc_dropdown.currentText()
+        self.convert_deck(deck_id, cc_profile)
+
+    def convert_deck(self, deck_id: DeckId, cc_profile: str):
+        if mw is None or mw.col is None:
+            showCritical("Error: main window is uninitialized")
+            return
+
+        cc = OpenCC(cc_profile)
+        deck = mw.col.decks.get(deck_id)
+        if deck is None:
+            showCritical("Error: deck not found")
+            return
+
+        # convert deck data
+        deck["name"] = cc.convert(deck["name"])
+        mw.col.decks.save(deck)
+
+        # convert card and gather note type
+        cids = mw.col.decks.cids(deck_id)
+        num_cards = len(cids)
+        note_types = {}
+        for cid in cids:
+            card = mw.col.get_card(cid)
+            note = card.note()
+            note_type = note.note_type()
+            if note_type is None:
+                continue
+
+            ntid = note_type["id"]
+            note_types[ntid] = note_type
+
+            for k, v in note.items():
+                note[k] = cc.convert(v)
+
+            mw.col.update_note(note)
+
+        # convert note type
+        num_nt = len(note_types)
+        for _, note_type in note_types.items():
+            for k, v in note_type.items():
+                if isinstance(v, str):
+                    note_type[k] = cc.convert(v)
+                elif isinstance(v, dict) or isinstance(v, list):
+                    note_type[k] = json.loads(
+                        cc.convert(json.dumps(v, ensure_ascii=False))
+                    )
+            mw.col.models.save(note_type)
+
+        showInfo(f"Convert {num_cards} cards and {num_nt} note type successfully")
 
 
-def testFunction() -> None:
-    if mw is None:
-        return
-    # get the number of cards in the current collection, which is stored in
-    # the main window
-    # cardCount = mw.col.cardCount()
-    if mw.col is None:
-        return
-    if mw.col.db is None:
+def main() -> None:
+    if mw is None or mw.col is None:
+        showCritical("Error: main window is uninitialized")
         return
 
     deckNamesAndIds = mw.col.decks.all_names_and_ids()
-
-    widget = Menu(deckNamesAndIds)
-    widget.exec()
-
-    # cc = OpenCC("s2t")
-    # did = mw.col.decks.get_current_id()
-    # deck = mw.col.decks.get(did)
-    # if deck is None:
-    #     return
-    # deck["name"] = cc.convert(deck["name"])
-    # mw.col.decks.save(deck)
-    # ids = mw.col.decks.cids(did)
-    # for id in ids:
-    #     card = mw.col.get_card(id)
-    #     note = card.note()
-    #     note_type = note.note_type()
-    #     if note_type is None:
-    #         return
-    #
-    #     for k, v in note_type.items():
-    #         if isinstance(v, str):
-    #             note_type[k] = cc.convert(v)
-    #         elif isinstance(v, dict) or isinstance(v, list):
-    #             note_type[k] = json.loads(cc.convert(json.dumps(v, ensure_ascii=False)))
-    #             showInfo(f"{note_type[k]}")
-    #
-    #     mw.col.models.save(note_type)
-    #
-    #     # showInfo(f"notetype: {note_type.keys()}")
-    #     showInfo(f"notetype: {note.note_type()}")
-    #     #
-    #     # for k, v in note.items():
-    #     #     # converted_k = cc.convert(k)
-    #     #     converted_v = cc.convert(v)
-    #     #     note[k] = converted_v
-    #     #
-    #     # mw.col.update_note(note)
-    #     # # showInfo(f"card: {dir(card)}")
-    #     # showInfo(f"card: {note.keys()}")
-    #     # showInfo(f"card: {note.values()}")
-    #     #
-    #     break
-    # # showInfo("Card counttt: %d" % (len(ids)))
-    # # show a message box
-    # # showInfo("Card count: %d" % cardCount)
+    dialog = CCDialog(deckNamesAndIds)
+    dialog.exec()
 
 
 # create a new menu item, "test"
-action = QAction("test", mw)
+action = QAction("AnkiCC", mw)
 # set it to call testFunction when it's clicked
-qconnect(action.triggered, testFunction)
+qconnect(action.triggered, main)
 # and add it to the tools menu
 mw.form.menuTools.addAction(action)
