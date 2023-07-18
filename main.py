@@ -31,12 +31,12 @@ mw = get_mw()
 
 
 class AnkiCCDialog(QDialog):
-    def __init__(self, deckNamesAndIds: Sequence[decks_pb2.DeckNameId]) -> None:
+    def __init__(self, deck_names_and_ids: Sequence[decks_pb2.DeckNameId]) -> None:
         super().__init__()
 
         deck_label = QLabel("Choose deck:")
         self.deck_dropdown = QComboBox()
-        for d in deckNamesAndIds:
+        for d in deck_names_and_ids:
             self.deck_dropdown.addItem(d.name, d.id)
 
         deck_hbox = QHBoxLayout()
@@ -156,8 +156,8 @@ def main() -> None:
         showCritical("Error: collection is uninitialized")
         return
 
-    deckNamesAndIds = mw.col.decks.all_names_and_ids()
-    dialog = AnkiCCDialog(deckNamesAndIds)
+    deck_names_and_ids = mw.col.decks.all_names_and_ids()
+    dialog = AnkiCCDialog(deck_names_and_ids)
     dialog.exec()
 
 
