@@ -21,11 +21,12 @@ README: [English](https://github.com/kaiiiz/AnkiCC/blob/main/README.en.md), [繁
 
 ## 使用
 
-1. 打開 Anki，選擇 _工具 → AnkiCC_
-2. 選擇欲轉換的牌組及 [OpenCC](https://github.com/BYVoid/OpenCC) profile
-3. 點擊 _Convert_
-4. 重啟 Anki 載入修改後的牌組
-5. [Optional] 執行 _工具 → 檢查資料庫_ 重建資料庫
+1. **在執行轉換前，請先備份欲轉換的牌組**
+2. 選擇 _工具 → AnkiCC_
+3. 選擇欲轉換的牌組及 [OpenCC](https://github.com/BYVoid/OpenCC) profile
+4. 點擊 _Convert_
+5. 重啟 Anki 載入修改後的牌組
+6. [Optional] 執行 _工具 → 檢查資料庫_ 重建資料庫
 
 ## 致謝
 
