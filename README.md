@@ -25,6 +25,7 @@ README: [English](https://github.com/kaiiiz/AnkiCC/blob/main/README.en.md), [繁
 2. 選擇欲轉換的牌組及 [OpenCC](https://github.com/BYVoid/OpenCC) profile
 3. 點擊 _Convert_
 4. 重啟 Anki 載入修改後的牌組
+5. [Optional] 執行 _工具 → 檢查資料庫_ 重建資料庫
 
 ## 致謝
 

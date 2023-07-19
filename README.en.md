@@ -25,6 +25,7 @@ Refer to [AnkiWeb](https://ankiweb.net/shared/info/158877706).
 2. Select the deck to convert and an [OpenCC](https://github.com/BYVoid/OpenCC) profile
 3. Click the _Convert_ button
 4. Restart Anki to reload the converted deck
+5. [Optional] Run _Tools → Check Database_ to rebuild the Anki database
 
 ## Acknowledgement
 
