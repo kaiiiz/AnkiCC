@@ -196,6 +196,8 @@ class AnkiCCDialog(QDialog):
             if ntid not in note_types:
                 note_types[ntid] = note_type
 
+            note.set_tags_from_str(cc.convert(note.string_tags()))
+
             for k, v in note.items():
                 if (ntid not in ignored_flds_tbl) or (k not in ignored_flds_tbl[ntid]):
                     note[k] = cc.convert(v)
