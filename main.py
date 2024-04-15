@@ -81,7 +81,7 @@ class AnkiCCDialog(QDialog):
         # Ignored fields
         ignored_flds_label = QLabel("Ignored fields:")
         self.ignored_flds = QListWidget()
-        self.ignored_flds.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
+        self.ignored_flds.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.MultiSelection)
         self.update_ignored_fields()
 
         ignored_flds_hbox = QHBoxLayout()
